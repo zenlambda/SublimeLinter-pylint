@@ -10,6 +10,7 @@
 
 """This module exports the Pylint plugin class."""
 
+import os
 import os.path as path
 import re
 import sublime
@@ -260,13 +261,18 @@ class Pylint(PythonLinter):
 
     def build_args(self, settings):
         """Attach paths so pylint can find more modules."""
-        if not settings.get('--rcfile='):
-            project_file = sublime.active_window().project_file_name()
-            if project_file:
-                working_dir = path.dirname(project_file)
-                rcfile = path.join(working_dir, 'pylintrc')
-                if path.isfile(rcfile):
-                    settings['--rcfile='] = rcfile
+        # print('SETTINGS {}'.format(settings))
+
+        project_file = sublime.active_window().project_file_name()
+        if project_file:
+            # print('FOUND PROJECT FILE {}'.format(project_file))
+            working_dir = path.dirname(project_file)
+            rcfile = path.join(working_dir, 'pylintrc')
+            if path.isfile(rcfile):
+                # print('FOUND RC FILE {}'.format(rcfile))
+                settings['args'].append('--rcfile={}'.format(rcfile))
+
+
 
         args = super().build_args(settings)
         if settings.get('paths'):
@@ -279,6 +285,19 @@ class Pylint(PythonLinter):
             args.append(init_hook)
 
         return args
+
+    # def run(self, cmd, code):
+    #     print('///////////////////////////////////////////////////////////////')
+    #     print('cwd: {}'.format(os.getcwd()))
+    #     print(cmd)
+    #     print('///////////////////////////////////////////////////////////////')
+    #     return super().run(cmd, code)
+
+    # def find_errors(self, output):
+    #     print('++*************************************************************')
+    #     print(output)
+    #     print('++*************************************************************')
+    #     return super().find_errors(output)
 
     def split_match(self, match):
         """
