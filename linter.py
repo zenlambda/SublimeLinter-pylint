@@ -10,7 +10,10 @@
 
 """This module exports the Pylint plugin class."""
 
+import os.path as path
 import re
+import sublime
+
 from SublimeLinter.lint import PythonLinter, util, persist
 
 
@@ -257,6 +260,14 @@ class Pylint(PythonLinter):
 
     def build_args(self, settings):
         """Attach paths so pylint can find more modules."""
+        if not settings.get('--rcfile='):
+            project_file = sublime.active_window().project_file_name()
+            if project_file:
+                working_dir = path.dirname(project_file)
+                rcfile = path.join(working_dir, 'pylintrc')
+                if path.isfile(rcfile):
+                    settings['--rcfile='] = rcfile
+
         args = super().build_args(settings)
         if settings.get('paths'):
             init_hook = '''--init-hook=import sys;{}'''.format(
@@ -266,6 +277,7 @@ class Pylint(PythonLinter):
                 )
             )
             args.append(init_hook)
+
         return args
 
     def split_match(self, match):
