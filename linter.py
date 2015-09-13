@@ -13,6 +13,9 @@
 import os
 import os.path as path
 import re
+import sys
+import traceback
+
 import sublime
 
 from SublimeLinter.lint import PythonLinter, util, persist
@@ -262,7 +265,7 @@ class Pylint(PythonLinter):
     def build_args(self, settings):
         """Attach paths so pylint can find more modules."""
         # print('SETTINGS {}'.format(settings))
-
+        # print(''.join(traceback.format_stack()))
         project_file = sublime.active_window().project_file_name()
         if project_file:
             # print('FOUND PROJECT FILE {}'.format(project_file))
@@ -270,7 +273,8 @@ class Pylint(PythonLinter):
             rcfile = path.join(working_dir, 'pylintrc')
             if path.isfile(rcfile):
                 # print('FOUND RC FILE {}'.format(rcfile))
-                settings['args'].append('--rcfile={}'.format(rcfile))
+                if not [s for s in settings['args'] if s.startswith('--rcfile=')]:
+                    settings['args'].append('--rcfile={}'.format(rcfile))
 
 
 
